@@ -6,7 +6,7 @@
 
 #define BUTTON 12
 #define KNOB A0
-#define SERVO 2
+#define SERVO 16
 #define DISPLAY1 5
 #define DISPLAY2 4
 #define DISPLAY_ADDR 0x3c
