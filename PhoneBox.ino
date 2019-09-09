@@ -3,37 +3,37 @@
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-​
+
 #define BUTTON 12
 #define KNOB A0
 #define SERVO 2
 #define DISPLAY1 5
 #define DISPLAY2 4
 #define DISPLAY_ADDR 0x3c
-​
+
 const char* ssid = "network";
 const char* pw = "ofthedove";
 int utc = -4; // Eastern daylight time
 WiFiClient client;
 WiFiUDP udp;
 NTPClient timeClient(udp, "time.nist.gov", utc * 3600, 60000);
-​
+
 enum {
   latchUnlocked = 45,
   latchLocked = 135,
 };
-​
+
 bool buttonPressed = false;
 bool armed = false;
 String armedString = "Open";
 unsigned int knobValue = 0;
 String timeString = "";
 String alarmString = "";
-​
-​
+
+
 Servo latch;
 SSD1306Wire  display(DISPLAY_ADDR, DISPLAY1, DISPLAY2);
-​
+
 void setup() {
   Serial.begin(115200);
   delay(10);
@@ -52,7 +52,7 @@ void setup() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-​
+
   timeClient.begin();
   timeClient.update();
   
@@ -67,10 +67,10 @@ void setup() {
   display.setFont(ArialMT_Plain_24);
   display.drawString(0, 0, "Startup");
   display.display();
-​
+
   pinMode(BUTTON, INPUT_PULLUP);
 }
-​
+
 void DisplayTask()
 {
   display.clear();
@@ -81,37 +81,37 @@ void DisplayTask()
   display.drawString(63,40, armedString);
   display.display();
 }
-​
+
 void TimeTask()
 {
   timeClient.update();
   String timeOfDay = timeClient.getFormattedTime();
   Serial.println(timeOfDay);
   timeString = timeOfDay;
-​
+
   if (alarmString == timeString) {
     armed = false;
     armedString = "Open";
   }
 }
-​
+
 void KnobTask()
 {
   unsigned int potential = analogRead(KNOB);
   knobValue = map(potential, 0, 024, 1440, 0);
-​
+
   static bool prevArmed = false;
   if (armed && armed == prevArmed) {
     return;
   }
   prevArmed = armed;
-​
+
   knobValue = potential;
   int hour = knobValue / 60;
   int min = knobValue % 60;
   alarmString = String(hour) + ":" + String(min) + ":00";
 }
-​
+
 void ServoTask()
 {
   static bool prevArmed;
@@ -126,13 +126,13 @@ void ServoTask()
     latch.write(latchUnlocked);
   }
 }
-​
+
 void ButtonTask()
 {
   // True is released, false is pressed
   bool buttonState = digitalRead(BUTTON);
   buttonPressed = !buttonState;
-​
+
   static bool prevButtonState = false;
   static bool armedB = false;
   if ((buttonState != prevButtonState) && (buttonState == false)) {
@@ -145,10 +145,10 @@ void ButtonTask()
       armedString = "Open";
     }
   }
-​
+
   prevButtonState =buttonState;
 }
-​
+
 // Scheduler ----------------------------
 typedef struct
 {
@@ -157,7 +157,7 @@ typedef struct
   unsigned long timeoutMillis;
   void (*callback)();
 } Timer_t;
-​
+
 static Timer_t schedulerTable[] = 
 {
   {0, 0, 100, &ButtonTask},
@@ -166,7 +166,7 @@ static Timer_t schedulerTable[] =
   {0, 0, 500, &TimeTask},
   {0, 0, 100, &ServoTask}
 };
-​
+
 void runScheduler()
 { 
   // Run each timer in the scheduler table, and call 
@@ -184,7 +184,7 @@ void runScheduler()
     }
   }
 }
-​
+
 void loop() {
   runScheduler();
 }
