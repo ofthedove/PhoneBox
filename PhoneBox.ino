@@ -108,7 +108,19 @@ void KnobTask()
 
   int hour = knobValue / 60;
   int min = knobValue % 60;
-  alarmString = String(hour) + ":" + String(min) + ":00";
+
+  if (hour >= 24) {
+    hour = 23;
+    min = 59;
+  }
+
+  alarmString = "";
+  alarmString += (hour < 10) ? "0" : "";
+  alarmString += String(hour);
+  alarmString += ":";
+  alarmString += (min < 10) ? "0" : "";
+  alarmString += String(min);
+  alarmString += ":00";
 }
 
 void ServoTask()
