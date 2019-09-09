@@ -109,6 +109,8 @@ void KnobTask()
   int hour = knobValue / 60;
   int min = knobValue % 60;
 
+  min -= min % 5;
+
   if (hour >= 24) {
     hour = 23;
     min = 59;
