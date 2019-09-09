@@ -98,7 +98,7 @@ void TimeTask()
 void KnobTask()
 {
   unsigned int potential = analogRead(KNOB);
-  knobValue = map(potential, 0, 024, 1440, 0);
+  knobValue = map(potential, 5, 1024, 1440, 0);
 
   static bool prevArmed = false;
   if (armed && armed == prevArmed) {
@@ -106,7 +106,6 @@ void KnobTask()
   }
   prevArmed = armed;
 
-  knobValue = potential;
   int hour = knobValue / 60;
   int min = knobValue % 60;
   alarmString = String(hour) + ":" + String(min) + ":00";
